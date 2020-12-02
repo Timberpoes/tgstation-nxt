@@ -1071,7 +1071,7 @@
  * Arguments:
  * * deadchat_plays_comp - The deadchat_control component that is being removed.
  */
-/atom/movable/proc/stop_deadchat_plays(var/deadchat_plays_comp)
+/atom/movable/proc/stop_deadchat_plays(deadchat_plays_comp)
 	SIGNAL_HANDLER
 
 /atom/movable/vv_get_dropdown()
