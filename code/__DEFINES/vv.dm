@@ -85,6 +85,9 @@
 #define VV_HK_AUTO_RENAME "auto_rename"
 #define VV_HK_RADIATE "radiate"
 
+// /atom/movable
+#define VV_HK_DEADCHAT_PLAYS "deadchat_plays"
+
 // /obj
 #define VV_HK_OSAY "osay"
 #define VV_HK_MASS_DEL_TYPE "mass_delete_type"
