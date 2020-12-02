@@ -715,7 +715,5 @@
 	stop_automated_movement = TRUE
 
 /mob/living/simple_animal/stop_deadchat_plays(var/deadchat_plays_comp)
-	SIGNAL_HANDLER
-
 	. = ..()
 	stop_automated_movement = FALSE
