@@ -1209,6 +1209,8 @@
 
 /mob/vv_do_topic(list/href_list)
 	. = ..()
+	if(!.)
+		return
 	if(href_list[VV_HK_REGEN_ICONS])
 		if(!check_rights(NONE))
 			return

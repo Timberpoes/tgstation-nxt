@@ -10,12 +10,15 @@
 	var/orbiters = list()
 	var/deadchat_mode
 	var/input_cooldown
+	///Callback thats invoked when the component is added, allows for changing up any vars on the component.
+	var/datum/callback/on_removal
 
-/datum/component/deadchat_control/Initialize(_deadchat_mode, _inputs, _input_cooldown = 12 SECONDS)
+/datum/component/deadchat_control/Initialize(_deadchat_mode, _inputs, _input_cooldown = 12 SECONDS, _removal_callbacl)
 	if(!isatom(parent))
 		return COMPONENT_INCOMPATIBLE
 	RegisterSignal(parent, COMSIG_ATOM_ORBIT_BEGIN, .proc/orbit_begin)
 	RegisterSignal(parent, COMSIG_ATOM_ORBIT_STOP, .proc/orbit_stop)
+	RegisterSignal(parent, COMSIG_VV_TOPIC, .proc/handle_vv_topic)
 	deadchat_mode = _deadchat_mode
 	inputs = _inputs
 	input_cooldown = _input_cooldown
@@ -24,6 +27,7 @@
 	notify_ghosts("[parent] is now deadchat controllable!", source = parent, action = NOTIFY_ORBIT, header="Something Interesting!")
 
 /datum/component/deadchat_control/Destroy(force, silent)
+	on_removal?.Invoke()
 	inputs = null
 	orbiters = null
 	ckey_to_cooldown = null
@@ -110,16 +114,19 @@
 		UnregisterSignal(orbiter, COMSIG_MOB_DEADSAY)
 		orbiters -= orbiter
 
-/**
- * Simple helper proc to add additional inputs to the deadchat_control component.
- *
- * Useful for snowflake mobs - For example, could add a new input to allow players to make Birdboat vomit.
- * Arguments:
- * * input_text - User input string to assign the callback to in the input list.
- * * callback - Proc callback for the input.
- */
-/datum/component/deadchat_control/proc/add_input(input_text, callback)
-	if(!input_text || !callback)
+///This proc ensures you can remove this component from vv
+/datum/component/deadchat_control/proc/handle_vv_topic(datum/source, mob/user, list/href_list)
+	SIGNAL_HANDLER
+	if(!href_list[VV_HK_DEADCHAT_PLAYS] || !check_rights(R_FUN))
 		return
+	. = COMPONENT_VV_HANDLED
+	INVOKE_ASYNC(src, .proc/async_handle_vv_topic, user, href_list)
 
-	inputs[input_text] = callback
+///Handle vv sleeps so make it async
+/datum/component/deadchat_control/proc/async_handle_vv_topic(mob/user, list/href_list)
+	if(alert(usr, "Remove deadchat control from [src]?", "Deadchat Plays [src]", "Remove", "Cancel") == "Remove")
+		to_chat(usr, "<span class='notice'>Deadchat can no longer control [src].</span>")
+		log_admin("[key_name(usr)] has removed deadchat control from [src]")
+		message_admins("<span class='notice'>[key_name(usr)] has removed deadchat control from [src]</span>")
+		qdel(src)
+		return

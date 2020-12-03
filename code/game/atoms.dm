@@ -1093,6 +1093,8 @@
 
 /atom/vv_do_topic(list/href_list)
 	. = ..()
+	if(!.)
+		return
 	if(href_list[VV_HK_ADD_REAGENT] && check_rights(R_VAREDIT))
 		if(!reagents)
 			var/amount = input(usr, "Specify the reagent size of [src]", "Set Reagent Size", 50) as num|null

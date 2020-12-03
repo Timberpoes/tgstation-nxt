@@ -392,6 +392,8 @@
 
 /obj/structure/sign/painting/vv_do_topic(list/href_list)
 	. = ..()
+	if(!.)
+		return
 	if(href_list[VV_HK_REMOVE_PAINTING])
 		if(!check_rights(NONE))
 			return

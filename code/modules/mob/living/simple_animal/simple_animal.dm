@@ -711,9 +711,12 @@
 	return
 
 /mob/living/simple_animal/deadchat_plays(mode = ANARCHY_MODE, cooldown = 12 SECONDS)
-	. = ..()
 	stop_automated_movement = TRUE
+	AddComponent(/datum/component/deadchat_control, mode, list(
+		"up" = CALLBACK(GLOBAL_PROC, .proc/_step, src, NORTH),
+		"down" = CALLBACK(GLOBAL_PROC, .proc/_step, src, SOUTH),
+		"left" = CALLBACK(GLOBAL_PROC, .proc/_step, src, WEST),
+		"right" = CALLBACK(GLOBAL_PROC, .proc/_step, src, EAST)), cooldown, CALLBACK(src, .proc/stop_deadchat_plays))
 
-/mob/living/simple_animal/stop_deadchat_plays(deadchat_plays_comp)
-	. = ..()
+/mob/living/simple_animal/proc/stop_deadchat_plays()
 	stop_automated_movement = FALSE
