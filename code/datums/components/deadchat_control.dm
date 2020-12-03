@@ -125,9 +125,9 @@
 
 ///Handle vv sleeps so make it async
 /datum/component/deadchat_control/proc/async_handle_vv_topic(mob/user, list/href_list)
-	if(alert(usr, "Remove deadchat control from [src]?", "Deadchat Plays [src]", "Remove", "Cancel") == "Remove")
-		to_chat(usr, "<span class='notice'>Deadchat can no longer control [src].</span>")
-		log_admin("[key_name(usr)] has removed deadchat control from [src]")
-		message_admins("<span class='notice'>[key_name(usr)] has removed deadchat control from [src]</span>")
+	if(alert(user, "Remove deadchat control from [parent]?", "Deadchat Plays [parent]", "Remove", "Cancel") == "Remove")
+		to_chat(user, "<span class='notice'>Deadchat can no longer control [parent].</span>")
+		log_admin("[key_name(user)] has removed deadchat control from [parent]")
+		message_admins("<span class='notice'>[key_name(user)] has removed deadchat control from [parent]</span>")
 		qdel(src)
 		return
