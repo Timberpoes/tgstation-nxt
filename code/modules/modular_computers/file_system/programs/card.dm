@@ -339,7 +339,7 @@
 			var/datum/id_trim/card_trim = id_card.trim
 			data["hasTrim"] = TRUE
 			data["trimAssignment"] = card_trim.assignment ? card_trim.assignment : ""
-			data["trimAccess"] = card_trim.access ? card_trim.access : list()
+			data["trimAccess"] = card_trim.get_supported_accesses()
 		else
 			data["hasTrim"] = FALSE
 			data["trimAssignment"] = ""

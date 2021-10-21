@@ -398,15 +398,19 @@
 	if(!length(accesses) || isnull(basic_access_list) || isnull(wildcard_access_list))
 		CRASH("Invalid parameters passed to build_access_lists")
 
-	var/list/trim_accesses = trim?.access
+	if(!trim)
+		wildcard_access_list |= accesses
+		return
 
-	// Populate the lists.
-	for(var/new_access in accesses)
-		if(new_access in trim_accesses)
-			basic_access_list |= new_access
-			continue
+	// Snowflake list operation. See http://www.byond.com/docs/ref/#/operator/&
+	// Creates a new list of every access contained in **both** accesses and trim.get_supported_accesses()
+	var/list/new_basic_accesses = (accesses & trim.get_supported_accesses())
 
-		wildcard_access_list |= new_access
+	// Add these to our basic_access_list.
+	basic_access_list |= new_basic_accesses
+
+	// Add any other accesses to our wildcard_access_list.
+	wildcard_access_list |= (accesses - new_basic_accesses)
 
 /obj/item/card/id/attack_self(mob/user)
 	if(Adjacent(user))
@@ -1178,7 +1182,7 @@
 
 	data["accesses"] = regions
 	data["ourAccess"] = access
-	data["ourTrimAccess"] = trim ? trim.access : list()
+	data["ourTrimAccess"] = trim ? trim.get_supported_accesses() : list()
 	data["theftAccess"] = target_card.access.Copy()
 	data["wildcardSlots"] = wildcard_slots
 	data["selectedList"] = access

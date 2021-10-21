@@ -24,6 +24,15 @@
 	/// The typepath to the job datum from the id_trim.
 	var/datum/job/job
 
+	/**
+	 * This is a list of all valid accesses that can be added to an ID card in non-wildcard slots.
+	 *
+	 * When CONFIG_GET(flag/jobs_have_minimal_access) is TRUE, this will allow ID cards to accept accesses from the extra_access list as non-wildcards without applying them to cards automatically.
+	 *
+	 * When CONFIG_GET(flag/jobs_have_minimal_access) is FALSE, this will be identical to the access list and will effectively do nothing.
+	 */
+	var/list/valid_non_wildcard_access = list()
+
 /datum/id_trim/job/New()
 	if(isnull(job_changes))
 		job_changes = SSmapping.config.job_changes
@@ -49,12 +58,17 @@
 
 	refresh_trim_access()
 
+/datum/id_trim/job/get_supported_accesses()
+	return valid_non_wildcard_access.Copy()
+
 /**
  * Goes through various non-map config settings and modifies the trim's access based on this.
  *
  * Returns TRUE if the config is loaded, FALSE otherwise.
  */
 /datum/id_trim/job/proc/refresh_trim_access()
+	valid_non_wildcard_access = minimal_access | extra_access
+
 	// If there's no config loaded then assume minimal access.
 	if(!config)
 		access = minimal_access.Copy()
@@ -72,6 +86,7 @@
 	// If the config has global maint access set, we always want to add maint access.
 	if(CONFIG_GET(flag/everyone_has_maint_access))
 		access |= list(ACCESS_MAINT_TUNNELS)
+		valid_non_wildcard_access |= list(ACCESS_MAINT_TUNNELS)
 
 	return TRUE
 

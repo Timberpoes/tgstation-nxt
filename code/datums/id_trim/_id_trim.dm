@@ -11,3 +11,7 @@
 	var/list/access = list()
 	/// Accesses that this trim unlocks on a card that require wildcard slots to apply. If a card cannot accept all a trim's wildcard accesses, the card is incompatible with the trim.
 	var/list/wildcard_access = list()
+
+/// Proc intended to be overridden. Returns a list of all accesses this trim supports as non-wildcards.
+/datum/id_trim/proc/get_supported_accesses()
+	return access.Copy()

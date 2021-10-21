@@ -47,7 +47,7 @@
 
 	// Doing this hurts my soul, but simplebot access reworks are for another day.
 	var/datum/id_trim/job/engi_trim = SSid_access.trim_singletons_by_path[/datum/id_trim/job/station_engineer]
-	access_card.add_access(engi_trim.access + engi_trim.wildcard_access)
+	access_card.add_access(engi_trim.get_supported_accesses() + engi_trim.wildcard_access)
 	prev_access = access_card.access.Copy()
 
 	if(toolbox_color == "s")
