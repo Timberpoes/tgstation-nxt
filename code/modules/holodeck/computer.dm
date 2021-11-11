@@ -165,7 +165,7 @@ GLOBAL_LIST_INIT(typecache_holodeck_linked_floorcheck_ok, typecacheof(list(/turf
 					valid = TRUE
 					break
 			if(!valid)
-				return FALSE
+				return
 			//load the map_template that program_to_load represents
 			if(program_to_load)
 				load_program(program_to_load)
