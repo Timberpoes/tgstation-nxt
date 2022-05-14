@@ -121,7 +121,11 @@
 
 	RegisterSignal(src, COMSIG_ATOM_UPDATED_ICON, .proc/update_in_wallet)
 
+	SSid_access.register_id_card(src)
+
 /obj/item/card/id/Destroy()
+	SSid_access.unregister_id_card(src)
+
 	if (registered_account)
 		registered_account.bank_cards -= src
 	if (my_store)

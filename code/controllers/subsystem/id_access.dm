@@ -32,6 +32,8 @@ SUBSYSTEM_DEF(id_access)
 	var/list/station_pda_templates = list()
 	/// Helper list containing all station regions.
 	var/list/station_regions = list()
+	/// Helper list containing all ID cards in the game world.
+	var/list/obj/item/card/id/world_id_cards = list()
 
 	/// The roundstart generated code for the spare ID safe. This is given to the Captain on shift start. If there's no Captain, it's given to the HoP. If there's no HoP
 	var/spare_id_safe_code = ""
@@ -486,3 +488,43 @@ SUBSYSTEM_DEF(id_access)
 			tally++
 
 	return tally
+
+/**
+ * Adds an ID card to the tracking list of all ID cards in the game world if that ID card isn't already in it.
+ *
+ * Arguments:
+ * * id_card - The ID card to add to the world_id_cards list.
+ */
+/datum/controller/subsystem/id_access/proc/register_id_card(obj/item/card/id/id_card)
+	world_id_cards |= id_card
+
+/**
+ * Removes an ID card from the tracking list of all ID cards in the game world.
+ *
+ * Arguments:
+ * * id_card - The ID card to remove from the world_id_cards list.
+ */
+/datum/controller/subsystem/id_access/proc/unregister_id_card(obj/item/card/id/id_card)
+	world_id_cards -= id_card
+
+/datum/controller/subsystem/id_access/ui_state(mob/user)
+	return GLOB.admin_state
+
+/datum/controller/subsystem/id_access/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "IdCardControlPanel")
+		ui.open()
+
+/datum/controller/subsystem/id_access/ui_data(mob/user)
+	var/list/data = list()
+
+	return data
+
+/datum/controller/subsystem/id_access/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(. || !check_rights_for(usr.client, R_ADMIN))
+		return
+	switch(action)
+		if("test")
+			return TRUE
