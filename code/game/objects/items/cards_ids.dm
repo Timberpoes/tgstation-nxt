@@ -18,8 +18,6 @@
  * FINGERPRINT CARD
  */
 
-
-
 /*
  * DATA CARDS - Used for the IC data card reader
  */
@@ -101,6 +99,9 @@
 
 	/// Boolean value. If TRUE, the [Intern] tag gets prepended to this ID card when the label is updated.
 	var/is_intern = FALSE
+
+	/// Used in admin ID card control panel to allow admins to filter out certain cards from the list.
+	var/tgui_filter_type = "Basic"
 
 /obj/item/card/id/Initialize(mapload)
 	. = ..()
@@ -761,12 +762,23 @@
 /obj/item/card/id/proc/get_trim_sechud_icon_state()
 	return trim?.sechud_icon_state || SECHUD_UNKNOWN
 
+/// Returns a tgui-compatible list of data from the ID card.
+/obj/item/card/id/proc/get_data_list()
+	var/list/data = list()
+
+	data["type"] = tgui_filter_type
+	data["name"] = name
+	data["location"] = "[loc]"
+
+	return data
+
 /obj/item/card/id/away
 	name = "\proper a perfectly generic identification card"
 	desc = "A perfectly generic identification card. Looks like it could use some flavor."
 	trim = /datum/id_trim/away
 	icon_state = "retro"
 	registered_age = null
+	tgui_filter_type = "Ruin/Away"
 
 /obj/item/card/id/away/hotel
 	name = "Staff ID"
@@ -811,6 +823,7 @@
 	var/department_ID = ACCOUNT_CIV
 	var/department_name = ACCOUNT_CIV_NAME
 	registered_age = null
+	tgui_filter_type = "Budget"
 
 /obj/item/card/id/departmental_budget/Initialize(mapload)
 	. = ..()
@@ -857,6 +870,8 @@
 	var/trim_assignment_override
 	/// If this is set, will manually override the trim shown for SecHUDs. Intended for admins to VV edit and chameleon ID cards.
 	var/sechud_icon_state_override = null
+
+	tgui_filter_type = "Grey"
 
 /obj/item/card/id/advanced/Initialize(mapload)
 	. = ..()
@@ -976,6 +991,7 @@
 	worn_icon_state = "card_silver"
 	inhand_icon_state = "silver_id"
 	wildcard_slots = WILDCARD_LIMIT_SILVER
+	tgui_filter_type = "Silver"
 
 /datum/id_trim/maint_reaper
 	access = list(ACCESS_MAINT_TUNNELS)
@@ -994,6 +1010,7 @@
 	worn_icon_state = "card_gold"
 	inhand_icon_state = "gold_id"
 	wildcard_slots = WILDCARD_LIMIT_GOLD
+	tgui_filter_type = "Gold"
 
 /obj/item/card/id/advanced/gold/captains_spare
 	name = "captain's spare ID"
@@ -1019,6 +1036,7 @@
 	registered_age = null
 	trim = /datum/id_trim/centcom
 	wildcard_slots = WILDCARD_LIMIT_CENTCOM
+	tgui_filter_type = "CentCom"
 
 /obj/item/card/id/advanced/centcom/ert
 	name = "\improper CentCom ID"
@@ -1062,6 +1080,7 @@
 	worn_icon_state = "card_black"
 	assigned_icon_state = "assigned_syndicate"
 	wildcard_slots = WILDCARD_LIMIT_GOLD
+	tgui_filter_type = "Black"
 
 /obj/item/card/id/advanced/black/deathsquad
 	name = "\improper Death Squad ID"
@@ -1069,6 +1088,7 @@
 	registered_name = JOB_ERT_DEATHSQUAD
 	trim = /datum/id_trim/centcom/deathsquad
 	wildcard_slots = WILDCARD_LIMIT_DEATHSQUAD
+	tgui_filter_type = "CentCom"
 
 /obj/item/card/id/advanced/black/syndicate_command
 	name = "syndicate ID card"
@@ -1113,6 +1133,7 @@
 	assigned_icon_state = "assigned_centcom"
 	trim = /datum/id_trim/admin
 	wildcard_slots = WILDCARD_LIMIT_ADMIN
+	tgui_filter_type = "Admin"
 
 /obj/item/card/id/advanced/debug/Initialize(mapload)
 	. = ..()
@@ -1142,6 +1163,8 @@
 	var/time_to_assign
 	/// Time left on a card till they can leave.
 	var/time_left = 0
+
+	tgui_filter_type = "Prisoner"
 
 /obj/item/card/id/advanced/prisoner/attackby(obj/item/card/id/C, mob/user)
 	..()
@@ -1236,6 +1259,7 @@
 	assigned_icon_state = "assigned_syndicate"
 	trim = /datum/id_trim/highlander
 	wildcard_slots = WILDCARD_LIMIT_ADMIN
+	tgui_filter_type = "Highlander"
 
 /obj/item/card/id/advanced/chameleon
 	name = "agent card"
@@ -1249,6 +1273,8 @@
 	var/anyone = FALSE
 	/// Weak ref to the ID card we're currently attempting to steal access from.
 	var/datum/weakref/theft_target
+
+	tgui_filter_type = "Chameleon"
 
 /obj/item/card/id/advanced/chameleon/Initialize(mapload)
 	. = ..()
@@ -1533,11 +1559,13 @@
 	desc = "A card used to provide ID and determine access across the station. There's blood dripping from the corner. Ew."
 	trim = /datum/id_trim/engioutpost
 	registered_age = 47
+	tgui_filter_type = "Ruin/Away"
 
 /obj/item/card/id/advanced/simple_bot
 	name = "simple bot ID card"
 	desc = "An internal ID card used by the station's non-sentient bots. You should report this to a coder if you're holding it."
 	wildcard_slots = WILDCARD_LIMIT_ADMIN
+	tgui_filter_type = "Bot"
 
 /obj/item/card/id/red
 	name = "Red Team identification card"

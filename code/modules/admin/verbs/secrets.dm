@@ -576,6 +576,11 @@ GLOBAL_DATUM(everyone_a_traitor, /datum/everyone_is_a_traitor_controller)
 				teamsize--
 
 			return TRUE
+		if("id_card_panel")
+			if(!is_funmin)
+				return
+			SSid_access.ui_interact(usr)
+			return TRUE
 	if(E)
 		E.processing = FALSE
 		if(E.announceWhen>0)

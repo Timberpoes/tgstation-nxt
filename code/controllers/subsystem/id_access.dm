@@ -519,6 +519,13 @@ SUBSYSTEM_DEF(id_access)
 /datum/controller/subsystem/id_access/ui_data(mob/user)
 	var/list/data = list()
 
+	data["idCards"] = list()
+
+	for(var/obj/item/card/id/id_card as anything in world_id_cards)
+		if(!id_card.loc)
+			continue
+		data["idCards"] += list(id_card.get_data_list())
+
 	return data
 
 /datum/controller/subsystem/id_access/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
