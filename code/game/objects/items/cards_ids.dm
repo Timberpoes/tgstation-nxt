@@ -769,6 +769,7 @@
 	data["type"] = tgui_filter_type
 	data["name"] = name
 	data["location"] = "[loc]"
+	data["ref"] = REF(src);
 
 	return data
 

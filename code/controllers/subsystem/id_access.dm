@@ -32,11 +32,16 @@ SUBSYSTEM_DEF(id_access)
 	var/list/station_pda_templates = list()
 	/// Helper list containing all station regions.
 	var/list/station_regions = list()
-	/// Helper list containing all ID cards in the game world.
-	var/list/obj/item/card/id/world_id_cards = list()
 
 	/// The roundstart generated code for the spare ID safe. This is given to the Captain on shift start. If there's no Captain, it's given to the HoP. If there's no HoP
 	var/spare_id_safe_code = ""
+
+	// Some stuff for the admin tgui interface.
+	/// Helper list containing all ID cards in the game world.
+	var/list/obj/item/card/id/world_id_cards = list()
+
+	/// Holds persistent state info for each admin user.
+	var/list/additional_tgui_state = list()
 
 /datum/controller/subsystem/id_access/Initialize(timeofday)
 	// We use this because creating the trim singletons requires the config to be loaded.
@@ -526,6 +531,32 @@ SUBSYSTEM_DEF(id_access)
 			continue
 		data["idCards"] += list(id_card.get_data_list())
 
+	var/selected_id_ref = additional_tgui_state[WEAKREF(user.client)]
+	var/obj/item/card/id/selected_id = (locate(selected_id_ref) in world_id_cards)
+
+	if(selected_id && istype(selected_id))
+		var/list/selected_id_data = list(
+			"ref" = selected_id_ref,
+			"name" = selected_id ? selected_id.name : "-----",
+			"rank" = selected_id.assignment ? selected_id.assignment : "Unassigned",
+			"owner" = selected_id.registered_name ? selected_id.registered_name : "-----",
+			"access" = selected_id.access,
+			"wildcards" = selected_id.wildcard_slots,
+			"age" = selected_id.registered_age,
+		)
+
+		if(selected_id.trim)
+			var/datum/id_trim/card_trim = selected_id.trim
+			selected_id_data["hasTrim"] = TRUE
+			selected_id_data["trimAssignment"] = card_trim.assignment ? card_trim.assignment : ""
+			selected_id_data["trimAccess"] = card_trim.access ? card_trim.access : list()
+		else
+			selected_id_data["hasTrim"] = FALSE
+			selected_id_data["trimAssignment"] = ""
+			selected_id_data["trimAccess"] = list()
+
+		data["selectedID"] = selected_id_data
+
 	return data
 
 /datum/controller/subsystem/id_access/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
@@ -533,5 +564,13 @@ SUBSYSTEM_DEF(id_access)
 	if(. || !check_rights_for(usr.client, R_ADMIN))
 		return
 	switch(action)
-		if("test")
+		if("select")
+			var/card_ref = params["ref"]
+			var/id_card = (locate(card_ref) in world_id_cards)
+
+			if(!id_card)
+				return TRUE
+
+			additional_tgui_state[WEAKREF(usr.client)] = card_ref
+
 			return TRUE

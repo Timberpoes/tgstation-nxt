@@ -1,8 +1,10 @@
 import { useBackend, useLocalState } from '../backend';
 import {
   Button,
-  LabeledList,
   Flex,
+  Section,
+  LabeledList,
+  Stack,
 } from '../components';
 import { Window } from '../layouts';
 
@@ -10,7 +12,30 @@ type BasicID = {
   type: string;
   name: string;
   location: string;
+  ref: string;
 };
+
+type CompleteID = {
+  ref: string;
+  name: string;
+  rank: string;
+  owner: string;
+  access: number[];
+  wildcards: WildcardSet;
+  age: number;
+  hasTrim: boolean;
+  trimAssignment: string;
+  trimAccess: number[];
+};
+
+type WildcardSet = {
+  [index: string]: Wildcard;
+}
+
+type Wildcard = {
+  limit: number;
+  usage: number[];
+}
 
 enum IdFilter {
   None = 0,
@@ -52,6 +77,7 @@ const logger = createLogger('drag');
 export const IdCardControlPanel = (props, context) => {
   const { act, data } = useBackend<{
     idCards: BasicID[];
+    selectedID?: CompleteID[];
   }>(context);
 
   const [cardFilterFlags, setCardFilterFlags] = useLocalState(context, "cardFilterFlags", IdFilter.All);
@@ -60,31 +86,59 @@ export const IdCardControlPanel = (props, context) => {
     (typeToFilter[card.type] & cardFilterFlags)
   );
 
+  const selectedID = data.selectedID;
+
   return (
-    <Window width={550} height={350}>
+    <Window width={560} height={600}>
       <Window.Content scrollable>
-        <Flex wrap="wrap" align="start">
-          {Object.entries(typeToFilter).map(([type, flag]) => (
-            <Flex.Item
-              key={type}
-              p={0.25}>
-              <Button.Checkbox fill
-                checked={(cardFilterFlags & flag)}
-                onClick={() => { setCardFilterFlags(cardFilterFlags ^ flag); }}>
-                {type}
-              </Button.Checkbox>
-            </Flex.Item>
-          ))}
-        </Flex>
-        <LabeledList>
-          {idCards.map(card => (
-            <LabeledList.Item
-              key={"someKey"}
-              label={"Name:" + card.name}>
-              {card.type} : {card.location}
-            </LabeledList.Item>
-          ))}
-        </LabeledList>
+        <Stack fill vertical>
+          <Stack.Item>
+            <Section title="Filters">
+              <Flex wrap="wrap" align="start" minHeight="auto">
+                {Object.entries(typeToFilter).map(([type, flag]) => (
+                  <Flex.Item
+                    key={type}
+                    p={0.25}>
+                    <Button.Checkbox
+                      checked={(cardFilterFlags & flag)}
+                      onClick={() => { setCardFilterFlags(cardFilterFlags ^ flag); }}>
+                      {type}
+                    </Button.Checkbox>
+                  </Flex.Item>
+                ))}
+              </Flex>
+            </Section>
+          </Stack.Item>
+          <Stack.Item grow>
+            <Section fill title="ID Cards" scrollable>
+              <Stack vertical>
+                <LabeledList>
+                  {idCards.map(card => (
+                    <Stack.Item key={card.ref}>
+                      <LabeledList.Item
+                        label={"Name:" + card.name}>
+                        {card.type} : {card.location}&nbsp;
+                        <Button
+                          onClick={() => { act("select", { ref: card.ref }); }}>
+                          Select
+                        </Button>
+                      </LabeledList.Item>
+                    </Stack.Item>
+                  ))}
+                </LabeledList>
+              </Stack>
+            </Section>
+          </Stack.Item>
+
+          {/* (!!selectedID) && (
+            <Stack.Item fill>
+              <Section minHeight="200px" minWidth="100%" fill>
+                {JSON.stringify(selectedID)}
+              </Section>
+            </Stack.Item>
+          )*/}
+        </Stack>
+
       </Window.Content>
     </Window>
   );
