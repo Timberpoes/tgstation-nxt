@@ -114,6 +114,8 @@
 #define POLICY_POLYMORPH "polymorph"
 /// Shown on top of policy verb window
 #define POLICY_VERB_HEADER "policy_verb_header"
+/// Reference index for policy.json to locate any policy text to be announced to the crew when the experimental AI trait rolls.
+#define POLICY_EXPERIMENTAL_AI_STATION_TRAIT "Experimental AI Station Trait"
 
 //How many things you can spawn at once with spawn verb/create panel
 #define ADMIN_SPAWN_CAP 100

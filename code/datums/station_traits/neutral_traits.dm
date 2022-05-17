@@ -24,6 +24,15 @@
 	report_message = "For experimental purposes, this station AI might show divergence from default lawset. Do not meddle with this experiment."
 	trait_to_give = STATION_TRAIT_UNIQUE_AI
 
+/datum/station_trait/unique_ai/New()
+	var/possible_config_policy = get_policy(POLICY_EXPERIMENTAL_AI_STATION_TRAIT)
+
+	if(!possible_config_policy)
+		return ..()
+
+	report_message = possible_config_policy
+	return ..()
+
 /datum/station_trait/ian_adventure
 	name = "Ian's Adventure"
 	trait_type = STATION_TRAIT_NEUTRAL
