@@ -7,6 +7,8 @@ import {
   Stack,
 } from '../components';
 import { Window } from '../layouts';
+import { NtosCardData, IDCardTarget, TemplateDropdown } from './NtosCard';
+import { AccessList } from './common/AccessList';
 
 type BasicID = {
   type: string;
@@ -14,28 +16,6 @@ type BasicID = {
   location: string;
   ref: string;
 };
-
-type CompleteID = {
-  ref: string;
-  name: string;
-  rank: string;
-  owner: string;
-  access: number[];
-  wildcards: WildcardSet;
-  age: number;
-  hasTrim: boolean;
-  trimAssignment: string;
-  trimAccess: number[];
-};
-
-type WildcardSet = {
-  [index: string]: Wildcard;
-}
-
-type Wildcard = {
-  limit: number;
-  usage: number[];
-}
 
 enum IdFilter {
   None = 0,
@@ -76,8 +56,8 @@ const logger = createLogger('drag');
 
 export const IdCardControlPanel = (props, context) => {
   const { act, data } = useBackend<{
-    idCards: BasicID[];
-    selectedID?: CompleteID[];
+    idCards: BasicID[],
+    has_id: boolean,
   }>(context);
 
   const [cardFilterFlags, setCardFilterFlags] = useLocalState(context, "cardFilterFlags", IdFilter.All);
@@ -86,10 +66,8 @@ export const IdCardControlPanel = (props, context) => {
     (typeToFilter[card.type] & cardFilterFlags)
   );
 
-  const selectedID = data.selectedID;
-
   return (
-    <Window width={560} height={600}>
+    <Window width={800} height={600}>
       <Window.Content scrollable>
         <Stack fill vertical>
           <Stack.Item>
@@ -129,17 +107,61 @@ export const IdCardControlPanel = (props, context) => {
               </Stack>
             </Section>
           </Stack.Item>
-
-          {/* (!!selectedID) && (
-            <Stack.Item fill>
-              <Section minHeight="200px" minWidth="100%" fill>
-                {JSON.stringify(selectedID)}
-              </Section>
-            </Stack.Item>
-          )*/}
+          {data.has_id && (
+            <CardModStuff />
+          )}
         </Stack>
-
       </Window.Content>
     </Window>
+  );
+};
+
+
+const CardModStuff = (props, context) => {
+  const { act, data } = useBackend<NtosCardData>(context);
+
+  const {
+    regions = [],
+    access_on_card = [],
+    wildcardSlots,
+    wildcardFlags,
+    trimAccess,
+    accessFlags,
+    accessFlagNames,
+    showBasic,
+    templates,
+  } = data;
+
+  return (
+    <>
+      <Stack.Item>
+        <IDCardTarget ejectButton={false} />
+      </Stack.Item>
+      <Stack.Item>
+        <TemplateDropdown templates={templates} />
+      </Stack.Item>
+      <Stack.Item>
+        <AccessList
+          accesses={regions}
+          selectedList={access_on_card}
+          wildcardFlags={wildcardFlags}
+          wildcardSlots={wildcardSlots}
+          trimAccess={trimAccess}
+          accessFlags={accessFlags}
+          accessFlagNames={accessFlagNames}
+          showBasic={!!showBasic}
+          extraButtons={
+            <Button.Confirm
+              content="Terminate Employment"
+              confirmContent="Fire Employee?"
+              color="bad"
+              onClick={() => act('PRG_terminate')} />
+          }
+          accessMod={(ref, wildcard) => act('PRG_access', {
+            access_target: ref,
+            access_wildcard: wildcard,
+          })} />
+      </Stack.Item>
+    </>
   );
 };

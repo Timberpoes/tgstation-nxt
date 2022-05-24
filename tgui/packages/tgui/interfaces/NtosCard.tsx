@@ -3,6 +3,54 @@ import { Box, Button, Dropdown, Input, NoticeBox, NumberInput, Section, Stack, T
 import { NtosWindow } from '../layouts';
 import { AccessList } from './common/AccessList';
 
+export type NtosCardData = {
+  authenticatedUser: string,
+  regions: [Region],
+  access_on_card: [string],
+  has_id: boolean,
+  have_id_slot: boolean,
+  wildcardSlots: WildcardSlots,
+  wildcardFlags: StringNumberPairs,
+  trimAccess: [string],
+  accessFlags: StringNumberPairs,
+  accessFlagNames: StringNumberPairs,
+  showBasic: boolean,
+  templates: StringStringPairs,
+  have_printer: boolean,
+  authIDName: string,
+  id_rank: string,
+  id_owner: string,
+  id_name: string,
+  id_age: number,
+};
+
+type Region = {
+  name: string,
+  accesses: [Access],
+};
+
+type Access = {
+  desc: string,
+  ref: string,
+};
+
+type WildcardSlots = {
+  [key: string]: Wildcard,
+};
+
+type Wildcard = {
+  limit: number,
+  usage: [string],
+};
+
+type StringNumberPairs = {
+  [key:string]: number,
+}
+
+type StringStringPairs = {
+  [key:string]: string,
+}
+
 export const NtosCard = (props, context) => {
   return (
     <NtosWindow
@@ -16,7 +64,7 @@ export const NtosCard = (props, context) => {
 };
 
 export const NtosCardContent = (props, context) => {
-  const { act, data } = useBackend(context);
+  const { act, data } = useBackend<NtosCardData>(context);
   const {
     authenticatedUser,
     regions = [],
@@ -30,7 +78,7 @@ export const NtosCardContent = (props, context) => {
     accessFlagNames,
     showBasic,
     templates = {},
-  } = data; 
+  } = data;
 
   if (!have_id_slot) {
     return (
@@ -134,7 +182,7 @@ const IDCardTabs = (props, context) => {
 };
 
 export const IDCardLogin = (props, context) => {
-  const { act, data } = useBackend(context);
+  const { act, data } = useBackend<NtosCardData>(context);
   const {
     authenticatedUser,
     has_id,
@@ -178,8 +226,8 @@ export const IDCardLogin = (props, context) => {
   );
 };
 
-const IDCardTarget = (props, context) => {
-  const { act, data } = useBackend(context);
+export const IDCardTarget = (props, context) => {
+  const { act, data } = useBackend<NtosCardData>(context);
   const {
     authenticatedUser,
     id_rank,
@@ -189,14 +237,22 @@ const IDCardTarget = (props, context) => {
     id_age,
   } = data;
 
+  const {
+    ejectButton = true,
+  } = props;
+
   return (
     <Section title="Modify ID">
-      <Button
-        width="100%"
-        ellipsis
-        icon="eject"
-        content={id_name}
-        onClick={() => act('PRG_ejectmodid')} />
+      {ejectButton && (
+        <Button
+          width="100%"
+          ellipsis
+          icon="eject"
+          content={id_name}
+          onClick={() => act('PRG_ejectmodid')} />
+      ) || (
+        <Section title={id_name} mb={-2} />
+      )}
       {!!(has_id && authenticatedUser) && (
         <>
           <Stack mt={1}>
@@ -243,7 +299,7 @@ const IDCardTarget = (props, context) => {
   );
 };
 
-const TemplateDropdown = (props, context) => {
+export const TemplateDropdown = (props, context) : JSX.Element | null => {
   const { act } = useBackend(context);
   const {
     templates,
@@ -252,7 +308,7 @@ const TemplateDropdown = (props, context) => {
   const templateKeys = Object.keys(templates);
 
   if (!templateKeys.length) {
-    return;
+    return null;
   }
 
   return (

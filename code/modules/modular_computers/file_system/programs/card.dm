@@ -291,8 +291,6 @@
 			regions += tgui_region_data[region]
 
 	data["regions"] = regions
-
-
 	data["accessFlags"] = SSid_access.flags_by_access
 	data["wildcardFlags"] = SSid_access.wildcard_flags_by_wildcard
 	data["accessFlagNames"] = SSid_access.access_flag_string_by_flag

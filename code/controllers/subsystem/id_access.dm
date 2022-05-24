@@ -521,6 +521,26 @@ SUBSYSTEM_DEF(id_access)
 		ui = new(user, src, "IdCardControlPanel")
 		ui.open()
 
+/datum/controller/subsystem/id_access/ui_static_data(mob/user)
+	var/list/data = list()
+
+	data["regions"] = list()
+
+	var/list/tgui_region_data = SSid_access.all_region_access_tgui
+	for(var/region in tgui_region_data)
+		data["regions"] += tgui_region_data[region]
+
+	data["accessFlags"] = SSid_access.flags_by_access
+	data["wildcardFlags"] = SSid_access.wildcard_flags_by_wildcard
+	data["accessFlagNames"] = SSid_access.access_flag_string_by_flag
+	data["showBasic"] = TRUE
+	data["templates"] = SSid_access.centcom_job_templates + SSid_access.station_job_templates
+	data["have_id_slot"] = TRUE
+	data["have_printer"] = FALSE
+	data["authenticatedUser"] = user.name
+
+	return data
+
 /datum/controller/subsystem/id_access/ui_data(mob/user)
 	var/list/data = list()
 
@@ -535,27 +555,23 @@ SUBSYSTEM_DEF(id_access)
 	var/obj/item/card/id/selected_id = (locate(selected_id_ref) in world_id_cards)
 
 	if(selected_id && istype(selected_id))
-		var/list/selected_id_data = list(
-			"ref" = selected_id_ref,
-			"name" = selected_id ? selected_id.name : "-----",
-			"rank" = selected_id.assignment ? selected_id.assignment : "Unassigned",
-			"owner" = selected_id.registered_name ? selected_id.registered_name : "-----",
-			"access" = selected_id.access,
-			"wildcards" = selected_id.wildcard_slots,
-			"age" = selected_id.registered_age,
-		)
+		data["has_id"] = TRUE
+		data["id_name"] = selected_id.name
+		data["id_rank"] = selected_id.assignment ? selected_id.assignment : "Unassigned"
+		data["id_owner"] = selected_id.registered_name ? selected_id.registered_name : "-----"
+		data["access_on_card"] = selected_id.access
+		data["wildcardSlots"] = selected_id.wildcard_slots
+		data["id_age"] = selected_id.registered_age
 
 		if(selected_id.trim)
 			var/datum/id_trim/card_trim = selected_id.trim
-			selected_id_data["hasTrim"] = TRUE
-			selected_id_data["trimAssignment"] = card_trim.assignment ? card_trim.assignment : ""
-			selected_id_data["trimAccess"] = card_trim.access ? card_trim.access : list()
+			data["hasTrim"] = TRUE
+			data["trimAssignment"] = card_trim.assignment ? card_trim.assignment : ""
+			data["trimAccess"] = card_trim.access ? card_trim.access : list()
 		else
-			selected_id_data["hasTrim"] = FALSE
-			selected_id_data["trimAssignment"] = ""
-			selected_id_data["trimAccess"] = list()
-
-		data["selectedID"] = selected_id_data
+			data["hasTrim"] = FALSE
+			data["trimAssignment"] = ""
+			data["trimAccess"] = list()
 
 	return data
 
